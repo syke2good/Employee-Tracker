@@ -117,6 +117,33 @@ function adddepartment() {
 }
 
 function addemployee() {
+    inquirer.prompt([
+        {
+          name: "firstname",
+          type: "input",
+          message: "Enter their first name "
+        },
+        {
+          name: "lastname",
+          type: "input",
+          message: "Enter their last name "
+        },
+        {
+          name: "role",
+          type: "list",
+          message: "What is their role? ",
+          choices: selectRole()
+        },
+        {
+            name: "choice",
+            type: "rawlist",
+            message: "Whats their managers name?",
+            choices: selectManager()
+        }
+    ])
+
+
+
     const sql = `SELECT * from employee`;
 
     db.query(sql, (err, rows) => {
