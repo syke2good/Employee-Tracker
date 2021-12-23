@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/syke2good/Employee-Tracker/issues"
   },
-  "homepage": "https://github.com/syke2good/Employee-Tracker#readme"
+  "homepage": "https://github.com/syke2good/Employee-Tracker#readme",
+  "dependencies": {
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.3.3"
+  }
 }
