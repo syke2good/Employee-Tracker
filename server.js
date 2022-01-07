@@ -87,11 +87,15 @@ function addemployee_info() {
 }
 
 function updateemployee_info() {
-    const sql = `SELECT name, id as value from department`;
+    const sql = `SELECT id as value, title as name from role`;
+    const sql2 = `SELECT concat(first_name, " ", last_name) as name, id as value from employee`;
 
     db.query(sql, (err, rows) => {
         if (err) throw err
-        updateemployee(rows)
+        db.query(sql2, (err2, rows2) => {
+            if (err2) throw err2
+            updateemployee(rows, rows2)
+        });
     });
 }
 
@@ -220,13 +224,29 @@ function addrole(departments) {
     })
 }
 
-function updateemployee() {
-    const sql = `SELECT * from employee`;
+function updateemployee(roles, employees) {
+    inquirer.prompt([
+        {
+            name: "employee",
+            type: "list",
+            message: "choose an employee to update ",
+            choices: employees
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "choose an employee role to update ",
+            choices: roles
+        },
+    ]).then (function (val) {
+        const sql = `UPDATE employee SET role_id = ? WHERE id = ?;`;
+        const param = [val.role, val.employee]
 
-    db.query(sql, (err, rows) => {
-        if (err) throw err
-        console.table(rows)
-        main()
-    });
+        db.query(sql, param, (err, rows) => {
+            if (err) throw err
+            console.table(rows)
+            main()
+        }); 
+    })
 }
 
