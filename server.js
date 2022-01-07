@@ -51,17 +51,49 @@ function main() {
                 adddepartment();
                 break
             case 'add a role?':
-                addrole();
+                addrole_info();
                 break
             case 'add an employee?':
-                addemployee();
+                addemployee_info();
                 break
             case 'update an employee role?':
-                updateemployee();
+                updateemployee_info();
                 break
         }
     })
 };
+
+function addrole_info() {
+    const sql = `SELECT name, id as value from department`;
+
+    db.query(sql, (err, rows) => {
+        if (err) throw err
+        addrole(rows)
+    });
+}
+
+function addemployee_info() {
+    const sql = `SELECT id as value, title as name from role`;
+    const sql2 = `SELECT concat(first_name, " ", last_name) as name, id as value from employee`;
+
+    db.query(sql, (err, rows) => {
+        if (err) throw err
+        db.query(sql2, (err2, rows2) => {
+            if (err2) throw err2
+            addemployee(rows, rows2)
+        });
+    });
+
+}
+
+function updateemployee_info() {
+    const sql = `SELECT name, id as value from department`;
+
+    db.query(sql, (err, rows) => {
+        if (err) throw err
+        updateemployee(rows)
+    });
+}
 
 function viewAlldepartments() {
     const sql = `SELECT * from department`;
@@ -116,51 +148,76 @@ function adddepartment() {
     })
 }
 
-function addemployee() {
+function addemployee(roles, managers) {
     inquirer.prompt([
         {
-          name: "firstname",
-          type: "input",
-          message: "Enter their first name "
+            name: "first_name",
+            type: "input",
+            message: "Enter their first name "
         },
         {
-          name: "lastname",
-          type: "input",
-          message: "Enter their last name "
+            name: "last_name",
+            type: "input",
+            message: "Enter their last name "
         },
         {
-          name: "role",
-          type: "list",
-          message: "What is their role? ",
-          choices: selectRole()
+            name: "role_id",
+            type: "list",
+            message: "What is their role? ",
+            choices: roles
         },
         {
-            name: "choice",
-            type: "rawlist",
+            name: "manager_id",
+            type: "list",
             message: "Whats their managers name?",
-            choices: selectManager()
+            choices: managers
         }
-    ])
+    ]).then(function (val) {
+        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`;
+        const param = [val.first_name, val.last_name, val.role_id, val.manager_id]
 
+        db.query(sql, param, (err, rows) => {
+            if (err) throw err
+            console.table(rows)
+            main()
+        });
 
-
-    const sql = `SELECT * from employee`;
-
-    db.query(sql, (err, rows) => {
-        if (err) throw err
-        console.table(rows)
-        main()
-    });
+    })
 }
 
-function addrole() {
-    const sql = `SELECT * from role`;
+function addrole(departments) {
+    inquirer.prompt([
+        {
+            name: "title",
+            type: "input",
+            message: "Enter their role "
+        },
+        {
+            name: "salary",
+            type: "input",
+            message: "Enter their salary "
+        },
+        {
+            name: "department_id",
+            type: "list",
+            message: "Enter their department ",
+            choices: departments// [{name:"HR", value:1}]
+        },
 
-    db.query(sql, (err, rows) => {
-        if (err) throw err
-        console.table(rows)
-        main()
-    });
+
+
+
+    ]).then(function (val) {
+        const sql = `INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`;
+        const param = [val.title, val.salary, val.department_id]
+
+        db.query(sql, param, (err, rows) => {
+            if (err) throw err
+            console.table(rows)
+            main()
+        });
+
+    })
 }
 
 function updateemployee() {
